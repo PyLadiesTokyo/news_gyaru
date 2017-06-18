@@ -43,19 +43,21 @@ class UrlHandler(tornado.web.RequestHandler):
             self.write(json)
 
 
+
+
 def main():
     parse_command_line()
     application = tornado.web.Application(
         [
-            (r"/test", TestHandler),
-            (r"/url", UrlHandler)
+            (r'/test', TestHandler),
+            (r'/url', UrlHandler)
         ]
     )
     application.listen(options.port)
-    print("接続OK")
-    print(u"http://サーバドメイン:" + str(options.port) + u"/")
+    print('接続OK')
+    print(u'http://サーバドメイン:' + str(options.port) + u'/')
     tornado.ioloop.IOLoop.instance().start()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
