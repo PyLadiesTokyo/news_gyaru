@@ -4,6 +4,8 @@ import tornado.ioloop
 import tornado.options
 import tornado.web
 from tornado.options import define, options, parse_command_line
+import redis
+import MeCab
 
 define('port', default=8888, help='run on the given port', type=int)
 
@@ -20,10 +22,10 @@ class TestHandler(tornado.web.RequestHandler):
 
 class UrlHandler(tornado.web.RequestHandler):
     """
-    url1からカテゴリを抽出する
+    urlからカテゴリを抽出する
     1.有効なドメインか判断する。
     2.有効なドメインの場合はそのドメインにひもづくカテゴリを返却する
-    (現在は産経新聞(国際政治)：WORLD_NEWS のみ)
+    (現在は産経新聞(国際政治): world のみ)
     """
 
     def post(self):
@@ -35,7 +37,7 @@ class UrlHandler(tornado.web.RequestHandler):
 
         if url.find('www.sankei.com/world/news/') >= 0:
             # カテゴリを返却する
-            json['category'] = 'WORLD_NEWS'
+            json['category'] = 'world'
             self.write(json)
 
         else:
@@ -43,19 +45,51 @@ class UrlHandler(tornado.web.RequestHandler):
             self.write(json)
 
 
+class WorldReplaceHandler(tornado.web.RequestHandler):
+    """
+    国際政治ニュースの書き換えを行う
+    """
+
+    def post(self):
+        json = tornado.escape.json_decode(self.request.body)
+        text = json['text']
+        mt = MeCab.Tagger('-Ochasen -d mecab -d /usr/local/lib/mecab/dic/mecab-ipadic-neologd/')
+        mt.parse('')
+        node = mt.parseToNode(text)
+        words = []
+        while node:
+            words.append(node.surface)
+            node = node.next
+
+        # 置換候補をギャル語辞書を使用して変換する
+        r = redis.StrictRedis(host='Redisサーバホスト名', db=0,
+                              password='Redis AUTH キー')
+        news = ''
+        for word in words:
+            gyaru_word = r.get(word)
+            if gyaru_word is None:
+                news = news + word
+            else:
+                news = news + gyaru_word.decode('utf-8')
+
+        # JSONの返却
+        self.write({'replaceText': news})
+
+
 def main():
     parse_command_line()
     application = tornado.web.Application(
         [
-            (r"/test", TestHandler),
-            (r"/url", UrlHandler)
+            (r'/test', TestHandler),
+            (r'/url', UrlHandler),
+            (r'/world/replace', WorldReplaceHandler)
         ]
     )
     application.listen(options.port)
-    print("接続OK")
-    print(u"http://サーバドメイン:" + str(options.port) + u"/")
+    print('接続OK')
+    print(u'http://サーバドメイン:' + str(options.port) + u'/')
     tornado.ioloop.IOLoop.instance().start()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
