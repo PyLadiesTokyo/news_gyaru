@@ -20,10 +20,10 @@ class TestHandler(tornado.web.RequestHandler):
 
 class UrlHandler(tornado.web.RequestHandler):
     """
-    url1からカテゴリを抽出する
+    urlからカテゴリを抽出する
     1.有効なドメインか判断する。
     2.有効なドメインの場合はそのドメインにひもづくカテゴリを返却する
-    (現在は産経新聞(国際政治)：WORLD_NEWS のみ)
+    (現在は産経新聞(国際政治): world のみ)
     """
 
     def post(self):
@@ -35,14 +35,27 @@ class UrlHandler(tornado.web.RequestHandler):
 
         if url.find('www.sankei.com/world/news/') >= 0:
             # カテゴリを返却する
-            json['category'] = 'WORLD_NEWS'
+            json['category'] = 'world'
             self.write(json)
 
         else:
             # ドメインが産経以外の場合はcategoryを返却しない
             self.write(json)
 
+class WorldReplaceHandler(tornado.web.RequestHandler):
+    """
+    国際政治ニュースの書き換えを行う
+    """
 
+    def post(self):
+        # TODO 文章から置換候補リストを作成する
+
+        # TODO 置換候補をギャル語辞書を使用して変換する
+
+        # TODO 変換した単語を連結
+
+        # TODO JSONの返却
+        self.write('ok')
 
 
 def main():
@@ -50,7 +63,8 @@ def main():
     application = tornado.web.Application(
         [
             (r'/test', TestHandler),
-            (r'/url', UrlHandler)
+            (r'/url', UrlHandler),
+            (r'/world/replace', WorldReplaceHandler)
         ]
     )
     application.listen(options.port)
