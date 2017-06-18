@@ -1,5 +1,11 @@
-# WEB API
+# WEB API 概要
 
+- Tornado 
+- requests
+- redis
+
+
+# API なんちゃって リファレンス
 ## サイトカテゴリ取得
 
 送付されたURLに対応したカテゴリを取得する。   
