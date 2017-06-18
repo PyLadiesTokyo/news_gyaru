@@ -1,0 +1,10 @@
+{"name": "GyaruGO News",
+  "version": "0.0.1",
+  "manifest_version": 2,
+  "description": "ギャル語でニュースを読む。",
+  "content_scripts": [{
+      "matches": [ "http://*/*", "https://*/*", "file:///Users/*/*" ],
+      "js": ["jquery-3.1.1.min.js", "get_category.js", "get_gyaruGo.js"],
+      "run_at": "document_idle"
+    }]
+}
