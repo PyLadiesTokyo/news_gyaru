@@ -5,6 +5,7 @@ import tornado.options
 import tornado.web
 from tornado.options import define, options, parse_command_line
 import redis
+import MeCab
 
 define('port', default=8888, help='run on the given port', type=int)
 
@@ -50,8 +51,15 @@ class WorldReplaceHandler(tornado.web.RequestHandler):
     """
 
     def post(self):
-        # TODO 文章から置換候補リストを作成する
-        words = ['てすと', 'てすと', 'てすと2']
+        json = tornado.escape.json_decode(self.request.body)
+        text = json['text']
+        mt = MeCab.Tagger('-Ochasen -d mecab -d /usr/local/lib/mecab/dic/mecab-ipadic-neologd/')
+        mt.parse('')
+        node = mt.parseToNode(text)
+        words = []
+        while node:
+            words.append(node.surface)
+            node = node.next
 
         # 置換候補をギャル語辞書を使用して変換する
         r = redis.StrictRedis(host='Redisサーバホスト名', db=0,
