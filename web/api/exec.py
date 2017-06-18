@@ -42,6 +42,7 @@ class UrlHandler(tornado.web.RequestHandler):
             # ドメインが産経以外の場合はcategoryを返却しない
             self.write(json)
 
+
 class WorldReplaceHandler(tornado.web.RequestHandler):
     """
     国際政治ニュースの書き換えを行う
