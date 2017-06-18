@@ -4,6 +4,7 @@ import tornado.ioloop
 import tornado.options
 import tornado.web
 from tornado.options import define, options, parse_command_line
+import redis
 
 define('port', default=8888, help='run on the given port', type=int)
 
@@ -50,13 +51,21 @@ class WorldReplaceHandler(tornado.web.RequestHandler):
 
     def post(self):
         # TODO 文章から置換候補リストを作成する
+        words = ['てすと', 'てすと', 'てすと2']
 
-        # TODO 置換候補をギャル語辞書を使用して変換する
+        # 置換候補をギャル語辞書を使用して変換する
+        r = redis.StrictRedis(host='Redisサーバホスト名', db=0,
+                              password='Redis AUTH キー')
+        news = ''
+        for word in words:
+            gyaru_word = r.get(word)
+            if gyaru_word is None:
+                news = news + word
+            else:
+                news = news + gyaru_word.decode('utf-8')
 
-        # TODO 変換した単語を連結
-
-        # TODO JSONの返却
-        self.write('ok')
+        # JSONの返却
+        self.write({'replaceText': news})
 
 
 def main():
